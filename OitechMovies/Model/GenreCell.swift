@@ -19,10 +19,11 @@ class GenreCell: UICollectionViewCell {
         contentView.addSubview(label)
         label.snp.makeConstraints { $0.edges.equalToSuperview().inset(8) }
 
-        label.font = .systemFont(ofSize: 14)
+        label.font = .systemFont(ofSize: 14, weight: .medium)
         label.textColor = .white
         label.textAlignment = .center
-        contentView.backgroundColor = .systemBlue
+        
+        contentView.backgroundColor = UIColor.systemGray.withAlphaComponent(0.7)
         contentView.layer.cornerRadius = 14
         contentView.clipsToBounds = true
     }

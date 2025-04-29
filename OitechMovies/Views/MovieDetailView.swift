@@ -15,6 +15,9 @@ class MovieDetailView: UIView, UICollectionViewDataSource, UICollectionViewDeleg
     let runtimeLabel = UILabel()
     let descriptionTitleLabel = UILabel()
     let descriptionLabel = UILabel()
+    
+    let actorsTitleLabel = UILabel()
+    let actorsLabel = UILabel()
 
     var genres: [String] = []
 
@@ -58,20 +61,27 @@ class MovieDetailView: UIView, UICollectionViewDataSource, UICollectionViewDeleg
             $0.width.equalToSuperview()
         }
 
-        [titleLabel, taglineLabel, genresCollectionView, yearLabel, ratingLabel, runtimeLabel, descriptionTitleLabel, descriptionLabel].forEach {
+        [titleLabel, taglineLabel, genresCollectionView, yearLabel, ratingLabel, runtimeLabel, descriptionTitleLabel, descriptionLabel, actorsTitleLabel, actorsLabel].forEach {
             contentView.addSubview($0)
         }
 
         titleLabel.font = .systemFont(ofSize: 28, weight: .bold)
+        titleLabel.numberOfLines = 0
+        
         taglineLabel.font = .italicSystemFont(ofSize: 16)
+        taglineLabel.numberOfLines = 2
         taglineLabel.textColor = .darkGray
 
         yearLabel.font = .systemFont(ofSize: 16)
         ratingLabel.font = .systemFont(ofSize: 16)
-        runtimeLabel.font = .systemFont(ofSize: 16)
-        descriptionTitleLabel.font = .systemFont(ofSize: 20, weight: .semibold)
+        descriptionTitleLabel.font = .systemFont(ofSize: 24, weight: .semibold)
+        
         descriptionLabel.numberOfLines = 0
         descriptionLabel.font = .systemFont(ofSize: 16)
+        
+        actorsTitleLabel.font = UIFont.systemFont(ofSize: 24, weight: .semibold)
+        actorsLabel.font = UIFont.systemFont(ofSize: 17)
+        actorsLabel.numberOfLines = 0
 
         setupConstraints()
     }
@@ -116,7 +126,17 @@ class MovieDetailView: UIView, UICollectionViewDataSource, UICollectionViewDeleg
         descriptionLabel.snp.makeConstraints {
             $0.top.equalTo(descriptionTitleLabel.snp.bottom).offset(8)
             $0.left.right.equalToSuperview().inset(16)
-            $0.bottom.equalToSuperview().offset(-20)
+        }
+        
+        actorsTitleLabel.snp.makeConstraints {
+            $0.top.equalTo(descriptionLabel.snp.bottom).offset(24)
+            $0.left.right.equalToSuperview().inset(16)
+        }
+
+        actorsLabel.snp.makeConstraints {
+            $0.top.equalTo(actorsTitleLabel.snp.bottom).offset(8)
+            $0.left.right.equalToSuperview().inset(16)
+            $0.bottom.equalToSuperview().offset(-32)
         }
     }
 
@@ -129,6 +149,10 @@ class MovieDetailView: UIView, UICollectionViewDataSource, UICollectionViewDeleg
         ratingLabel.text = "IMDb Rating: \(movie.imdb_rating ?? "0")"
         descriptionTitleLabel.text = "Description"
         descriptionLabel.text = movie.description
+        actorsTitleLabel.text = "Starring"
+        let topActors = movie.stars?.prefix(10)
+        actorsLabel.text = topActors?.joined(separator: "\n• ")
+        actorsLabel.text = "• " + actorsLabel.text!
 
         genres = movie.genres ?? []
         genresCollectionView.reloadData()
