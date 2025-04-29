@@ -1,8 +1,8 @@
 import UIKit
 import SnapKit
 
-class MovieDetailView: UIView {
-    
+class MovieDetailView: UIView, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+
     // MARK: - UI Components
 
     let scrollView = UIScrollView()
@@ -13,9 +13,25 @@ class MovieDetailView: UIView {
     let yearLabel = UILabel()
     let ratingLabel = UILabel()
     let runtimeLabel = UILabel()
-    let genresLabel = UILabel()
     let descriptionTitleLabel = UILabel()
     let descriptionLabel = UILabel()
+
+    var genres: [String] = []
+
+    lazy var genresCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        layout.minimumLineSpacing = 8
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.register(GenreCell.self, forCellWithReuseIdentifier: GenreCell.identifier)
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.backgroundColor = .clear
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        return collectionView
+    }()
 
     // MARK: - Init
 
@@ -36,17 +52,13 @@ class MovieDetailView: UIView {
         addSubview(scrollView)
         scrollView.addSubview(contentView)
 
-        scrollView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+        scrollView.snp.makeConstraints { $0.edges.equalToSuperview() }
+        contentView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+            $0.width.equalToSuperview()
         }
 
-        contentView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-            make.width.equalToSuperview()
-        }
-
-        [titleLabel, taglineLabel, yearLabel, ratingLabel, runtimeLabel, genresLabel, descriptionTitleLabel, descriptionLabel].forEach {
-            $0.numberOfLines = 0
+        [titleLabel, taglineLabel, genresCollectionView, yearLabel, ratingLabel, runtimeLabel, descriptionTitleLabel, descriptionLabel].forEach {
             contentView.addSubview($0)
         }
 
@@ -57,53 +69,54 @@ class MovieDetailView: UIView {
         yearLabel.font = .systemFont(ofSize: 16)
         ratingLabel.font = .systemFont(ofSize: 16)
         runtimeLabel.font = .systemFont(ofSize: 16)
-        genresLabel.font = .systemFont(ofSize: 16)
-        descriptionTitleLabel.font = .systemFont(ofSize: 24, weight: .semibold)
+        descriptionTitleLabel.font = .systemFont(ofSize: 20, weight: .semibold)
+        descriptionLabel.numberOfLines = 0
         descriptionLabel.font = .systemFont(ofSize: 16)
 
         setupConstraints()
     }
 
     private func setupConstraints() {
-        titleLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(24)
-            make.left.right.equalToSuperview().inset(16)
+        titleLabel.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(24)
+            $0.left.right.equalToSuperview().inset(16)
         }
 
-        taglineLabel.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(8)
-            make.left.right.equalToSuperview().inset(16)
+        taglineLabel.snp.makeConstraints {
+            $0.top.equalTo(titleLabel.snp.bottom).offset(8)
+            $0.left.right.equalToSuperview().inset(16)
         }
 
-        yearLabel.snp.makeConstraints { make in
-            make.top.equalTo(taglineLabel.snp.bottom).offset(12)
-            make.left.right.equalToSuperview().inset(16)
+        genresCollectionView.snp.makeConstraints {
+            $0.top.equalTo(taglineLabel.snp.bottom).offset(12)
+            $0.left.right.equalToSuperview()
+            $0.height.equalTo(32)
         }
 
-        ratingLabel.snp.makeConstraints { make in
-            make.top.equalTo(yearLabel.snp.bottom).offset(8)
-            make.left.right.equalToSuperview().inset(16)
+        yearLabel.snp.makeConstraints {
+            $0.top.equalTo(genresCollectionView.snp.bottom).offset(16)
+            $0.left.right.equalToSuperview().inset(16)
         }
 
-        runtimeLabel.snp.makeConstraints { make in
-            make.top.equalTo(ratingLabel.snp.bottom).offset(8)
-            make.left.right.equalToSuperview().inset(16)
+        ratingLabel.snp.makeConstraints {
+            $0.top.equalTo(yearLabel.snp.bottom).offset(8)
+            $0.left.right.equalToSuperview().inset(16)
         }
 
-        genresLabel.snp.makeConstraints { make in
-            make.top.equalTo(runtimeLabel.snp.bottom).offset(8)
-            make.left.right.equalToSuperview().inset(16)
+        runtimeLabel.snp.makeConstraints {
+            $0.top.equalTo(ratingLabel.snp.bottom).offset(8)
+            $0.left.right.equalToSuperview().inset(16)
         }
 
-        descriptionTitleLabel.snp.makeConstraints { make in
-            make.top.equalTo(genresLabel.snp.bottom).offset(20)
-            make.left.right.equalToSuperview().inset(16)
+        descriptionTitleLabel.snp.makeConstraints {
+            $0.top.equalTo(runtimeLabel.snp.bottom).offset(20)
+            $0.left.right.equalToSuperview().inset(16)
         }
 
-        descriptionLabel.snp.makeConstraints { make in
-            make.top.equalTo(descriptionTitleLabel.snp.bottom).offset(8)
-            make.left.right.equalToSuperview().inset(16)
-            make.bottom.equalToSuperview().offset(-20)
+        descriptionLabel.snp.makeConstraints {
+            $0.top.equalTo(descriptionTitleLabel.snp.bottom).offset(8)
+            $0.left.right.equalToSuperview().inset(16)
+            $0.bottom.equalToSuperview().offset(-20)
         }
     }
 
@@ -111,11 +124,33 @@ class MovieDetailView: UIView {
 
     func configure(with movie: MovieDetail) {
         titleLabel.text = movie.title
-        taglineLabel.text = movie.tagline.isEmpty ? "" : "\"\(movie.tagline)\""
+        taglineLabel.text = movie.tagline
         yearLabel.text = "Year: \(movie.year)"
-        ratingLabel.text = "IMDb Rating ⭐️: \(movie.imdb_rating ?? "0"))"
-        genresLabel.text = "Genres: \(movie.genres?.joined(separator: ", ") ?? "asd")"
+        ratingLabel.text = "IMDb Rating: \(movie.imdb_rating ?? "0")"
         descriptionTitleLabel.text = "Description"
         descriptionLabel.text = movie.description
+
+        genres = movie.genres ?? []
+        genresCollectionView.reloadData()
+    }
+
+    // MARK: - Collection View DataSource & Delegate
+
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return genres.count
+    }
+
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: GenreCell.identifier, for: indexPath) as? GenreCell else {
+            return UICollectionViewCell()
+        }
+        cell.configure(with: genres[indexPath.item])
+        return cell
+    }
+
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let text = genres[indexPath.item]
+        let width = text.size(withAttributes: [.font: UIFont.systemFont(ofSize: 14)]).width + 20
+        return CGSize(width: width, height: 28)
     }
 }
