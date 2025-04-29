@@ -3,7 +3,7 @@
 This app connects to a third-party API ([RapidAPI - Movies & TV Shows Database](https://rapidapi.com/SAdrian/api/movies-tv-shows-database)) and includes:
 
 - Display of trending movies
-- Movie search functionality (via API request)
+- Movie search functionality
 - Detailed movie view, including:
   - Title, release year, rating
   - Genres (horizontal collection view)
