@@ -43,7 +43,9 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     
     @objc private func didTapSearch() {
         toggleSearchBar(show: searchBar.isHidden ? true : false)
-        searchBar.becomeFirstResponder()
+        if !searchBar.isHidden {
+            searchBar.becomeFirstResponder()
+        }
     }
 
     private func setupView() {
