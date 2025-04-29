@@ -26,7 +26,7 @@ class APIService {
                 completion(.failure(error))
             } else if let data = data {
                 do {
-                    let decoded = try JSONDecoder().decode(TrendingMoviesResponse.self, from: data)
+                    let decoded = try JSONDecoder().decode(MoviesResponse.self, from: data)
                     completion(.success(decoded.movie_results))
                 } catch {
                     completion(.failure(error))
@@ -54,6 +54,35 @@ class APIService {
                 do {
                     let decoded = try JSONDecoder().decode(MovieDetail.self, from: data)
                     completion(.success(decoded))
+                } catch {
+                    completion(.failure(error))
+                }
+            }
+        }.resume()
+    }
+    
+    func searchMovie(title: String, completion: @escaping (Result<[Movie], Error>) -> Void) {
+        guard var urlComponents = URLComponents(string: baseURL) else {
+            return
+        }
+        
+        let encodedTitle = title.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        urlComponents.queryItems = [URLQueryItem(name: "title", value: encodedTitle)]
+        
+        var request = URLRequest(url: urlComponents.url!)
+        request.httpMethod = "GET"
+        request.setValue(apiKey, forHTTPHeaderField: "x-rapidapi-key")
+        request.setValue(host, forHTTPHeaderField: "x-rapidapi-host")
+        request.setValue("get-movies-by-title", forHTTPHeaderField: "Type")
+        
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            print(String(decoding: data!, as: UTF8.self))
+            if let error = error {
+                completion(.failure(error))
+            } else if let data = data {
+                do {
+                    let decoded = try JSONDecoder().decode(MoviesResponse.self, from: data)
+                    completion(.success(decoded.movie_results))
                 } catch {
                     completion(.failure(error))
                 }
