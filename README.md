@@ -1,6 +1,6 @@
 ## Overview
 
-This app connects to a third-party API ([RapidAPI - Movies & TV Shows Database](https://rapidapi.com/SAdrian/api/movies-tv-shows-database)) and includes:
+This app connects to a third-party API ([RapidAPI - Movies & TV Shows Database](https://rapidapi.com/amrelrafie/api/movies-tv-shows-database)) and includes:
 
 - Display of trending movies
 - Movie search functionality
