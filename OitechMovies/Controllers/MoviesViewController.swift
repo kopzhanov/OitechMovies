@@ -14,7 +14,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         titleLabel.text = "Trending Movies"
         titleLabel.font = UIFont.boldSystemFont(ofSize: 24)
-
+        
         searchButton.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
         searchButton.addTarget(self, action: #selector(didTapSearch), for: .touchUpInside)
 
@@ -27,39 +27,63 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         searchBar.placeholder = "Search for a movie"
         searchBar.delegate = self
         searchBar.isHidden = true
-
-        view.addSubview(headerStack)
-        view.addSubview(searchBar)
-        view.backgroundColor = .white
-        setupTableView()
+        setupView()
         fetchMovies()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+    }
+    
     @objc private func didTapSearch() {
-        searchBar.isHidden.toggle()
+        toggleSearchBar(show: searchBar.isHidden ? true : false)
         searchBar.becomeFirstResponder()
     }
 
-    private func setupTableView() {
+    private func setupView() {
+        view.backgroundColor = .white
         view.addSubview(tableView)
+        view.addSubview(headerStack)
+        view.addSubview(searchBar)
+        
         tableView.register(MovieTableViewCell.self, forCellReuseIdentifier: MovieTableViewCell.identifier)
         tableView.dataSource = self
         tableView.delegate = self
         
         headerStack.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(16)
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
             make.leading.trailing.equalToSuperview().inset(16)
         }
 
         searchBar.snp.makeConstraints { make in
-            make.top.equalTo(headerStack.snp.bottom).offset(8)
-            make.leading.trailing.equalToSuperview().inset(16)
-            make.height.equalTo(44)
+            make.top.equalTo(headerStack.snp.bottom)
+            make.leading.trailing.equalToSuperview()
+            make.height.equalTo(0)
         }
 
         tableView.snp.makeConstraints { make in
-            make.top.equalTo(searchBar.snp.bottom).offset(8)
+            make.top.equalTo(searchBar.snp.bottom).offset(10)
             make.leading.trailing.bottom.equalToSuperview()
+        }
+    }
+    
+    func toggleSearchBar(show: Bool) {
+        UIView.animate(withDuration: 0.3) {
+            self.searchBar.isHidden = false
+            self.searchBar.snp.updateConstraints { make in
+                make.height.equalTo(show ? 44 : 0)
+            }
+            self.view.layoutIfNeeded()
+            
+            if !show {
+                self.searchBar.isHidden = true
+            }
         }
     }
 
@@ -98,7 +122,6 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let text = searchBar.text, !text.isEmpty else { return }
 
-        print(text)
         APIService.shared.searchMovie(title: text) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {

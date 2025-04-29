@@ -66,8 +66,7 @@ class APIService {
             return
         }
         
-        let encodedTitle = title.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        urlComponents.queryItems = [URLQueryItem(name: "title", value: encodedTitle)]
+        urlComponents.queryItems = [URLQueryItem(name: "title", value: title)]
         
         var request = URLRequest(url: urlComponents.url!)
         request.httpMethod = "GET"
@@ -76,7 +75,6 @@ class APIService {
         request.setValue("get-movies-by-title", forHTTPHeaderField: "Type")
         
         URLSession.shared.dataTask(with: request) { data, _, error in
-            print(String(decoding: data!, as: UTF8.self))
             if let error = error {
                 completion(.failure(error))
             } else if let data = data {
